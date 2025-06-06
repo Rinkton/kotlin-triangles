@@ -1,6 +1,7 @@
-package ru.yarsu
+package ru.yarsu.classes
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import ru.yarsu.enums.Role
 import java.time.LocalDateTime
 import java.util.*
 

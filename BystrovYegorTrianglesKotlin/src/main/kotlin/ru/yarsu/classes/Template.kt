@@ -1,7 +1,7 @@
-package ru.yarsu
+package ru.yarsu.classes
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.time.LocalDateTime
+import ru.yarsu.enums.Type
 import java.util.*
 
 class Template constructor(

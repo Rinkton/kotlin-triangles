@@ -1,4 +1,4 @@
-package ru.yarsu
+package ru.yarsu.enums
 
 enum class Color(
     val rgb: Int,
@@ -22,6 +22,14 @@ enum class Color(
     ;
 
     companion object {
+        fun fromString(v: String): Color {
+            return try {
+                Color.valueOf(v)
+            } catch (e: IllegalArgumentException) {
+                throw IllegalArgumentException("Invalid color: '$v'. Available colors are: ${Color.entries.joinToString()}")
+            }
+        }
+
         fun fromRgbString(rgb: String): Color? {
             val intRgb = rgb.replace("#", "").toLong(16).toInt()
             val color: Color? =
