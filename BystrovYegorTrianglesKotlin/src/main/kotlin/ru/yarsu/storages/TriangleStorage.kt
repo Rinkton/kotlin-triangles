@@ -8,8 +8,7 @@ import kotlin.collections.ArrayList
 
 class TriangleStorage(
     filePath: String,
-) : Storage(filePath) {
-    private val triangles = ArrayList<Triangle>()
+) : Storage<Triangle>(filePath, ArrayList<Triangle>()) {
 
     override fun fillUpStoragesWithDicts(dicts: List<Map<String, String>>) {
         for (dict in dicts) {
@@ -23,7 +22,7 @@ class TriangleStorage(
                     dict["Description"] ?: "",
                     UUID.fromString((dict["Owner"])),
                 )
-            triangles.add(triangle)
+            items.add(triangle)
         }
     }
 }

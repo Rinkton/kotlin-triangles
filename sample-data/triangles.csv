@@ -1,0 +1,4 @@
+Id,Template,RegistrationDateTime,BorderColor,FillColor,Description,Owner
+66ade672-2301-4408-9471-8a17aa883d65,4ae25b32-d794-4560-8a08-5e6d09a19c33,2024-08-26T19:01:41.114511727,GREEN,RED,"странные данные, это неправильный треугольник",de42a00f-7f43-4d10-808d-bee47fdeef49
+a6be5e23-b8d4-4d78-8aa3-1c204d0befc8,22f9f6c1-82af-4681-b92e-a3510ecee4b5,2024-07-10T17:26:41.129567382,RED,GREEN,"точки расположены на отрезке",de42a00f-7f43-4d10-808d-bee47fdeef49
+baa30333-23d6-4eba-a8ed-7c235adf4228,0c96ea19-fa65-499a-80ad-ea0c86b2a5e0,2024-07-27T00:10:41.129642513,RED,GREEN,"обычный треугольник",de42a00f-7f43-4d10-808d-bee47fdeef49

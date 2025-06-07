@@ -6,8 +6,7 @@ import kotlin.collections.ArrayList
 
 class TemplateStorage(
     filePath: String,
-) : Storage(filePath) {
-    private val templates = ArrayList<Template>()
+) : Storage<Template>(filePath, ArrayList<Template>()) {
 
     override fun fillUpStoragesWithDicts(dicts: List<Map<String, String>>) {
         for (dict in dicts) {
@@ -18,7 +17,7 @@ class TemplateStorage(
                     getNaturalNumber(dict["SideB"]),
                     getNaturalNumber(dict["SideC"]),
                 )
-            templates.add(template)
+            items.add(template)
         }
     }
 }

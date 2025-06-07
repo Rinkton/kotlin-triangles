@@ -1,5 +1,6 @@
 package ru.yarsu.storages
 
+import ru.yarsu.JwtTools
 import ru.yarsu.classes.User
 import ru.yarsu.enums.Role
 import java.time.LocalDateTime
@@ -8,8 +9,8 @@ import kotlin.collections.ArrayList
 
 class UserStorage(
     filePath: String,
-) : Storage(filePath) {
-    private val users = ArrayList<User>()
+    jwtTools: JwtTools,
+) : Storage<User>(filePath, ArrayList<User>()) {
 
     override fun fillUpStoragesWithDicts(dicts: List<Map<String, String>>) {
         for (dict in dicts) {
@@ -21,7 +22,13 @@ class UserStorage(
                     dict["Email"] ?: "",
                     Role.fromString(dict["Role"] ?: ""),
                 )
-            users.add(user)
+            items.add(user)
         }
     }
+
+    fun getUsers(): ArrayList<User> = items
+
+    fun getUserByLogin(login: String): User? = items.find { it.login == login }
+
+    fun getUserById(id: UUID?): User? = items.find { it.id == id }
 }

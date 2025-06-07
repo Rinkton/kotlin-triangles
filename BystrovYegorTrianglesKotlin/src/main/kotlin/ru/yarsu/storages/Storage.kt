@@ -6,8 +6,9 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 
-open class Storage(
+open class Storage<T>(
     filePath: String,
+    protected val items: ArrayList<T>
 ) {
     init {
         val file = getFile(filePath)
