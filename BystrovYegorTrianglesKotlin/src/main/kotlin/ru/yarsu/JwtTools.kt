@@ -1,9 +1,10 @@
-package ru.yarsu
+package ru.yarsu.ru.yarsu
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
+import org.http4k.core.Request
 import ru.yarsu.classes.User
 import ru.yarsu.storages.UserStorage
 import java.time.Instant
@@ -64,4 +65,19 @@ class JwtTools(
             null
         }
     }
+}
+
+fun getExtractedUserIdAndValidate(
+    request: Request,
+    jwtTools: JwtTools,
+    userStorage: UserStorage,
+): UUID? {
+    val token = request.header("Authorization")
+    if (token != null) {
+        val userId = jwtTools.validateAndExtractUserId(token, userStorage)
+        if (userId != null) {
+            return userId
+        }
+    }
+    return null
 }

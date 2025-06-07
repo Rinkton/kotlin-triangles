@@ -1,6 +1,6 @@
 package ru.yarsu.storages
 
-import ru.yarsu.JwtTools
+import ru.yarsu.ru.yarsu.JwtTools
 import ru.yarsu.classes.User
 import ru.yarsu.enums.Role
 import java.time.LocalDateTime
