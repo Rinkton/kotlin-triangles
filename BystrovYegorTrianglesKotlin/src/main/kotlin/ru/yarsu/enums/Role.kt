@@ -9,12 +9,11 @@ enum class Role(
     ;
 
     companion object {
-        fun fromString(v: String): Role {
-            return try {
+        fun fromString(v: String): Role =
+            try {
                 Role.valueOf(v)
             } catch (e: IllegalArgumentException) {
                 throw IllegalArgumentException("Invalid role: '$v'. Available roles are: ${entries.joinToString()}")
             }
-        }
     }
 }

@@ -4,9 +4,6 @@ import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.time.LocalDateTime
-import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 
 open class Storage(
@@ -17,7 +14,7 @@ open class Storage(
         val dicts: List<Map<String, String>> = csvReader().readAllWithHeader(file)
         try {
             fillUpStoragesWithDicts(dicts)
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             System.err.println(e.message)
         }
     }

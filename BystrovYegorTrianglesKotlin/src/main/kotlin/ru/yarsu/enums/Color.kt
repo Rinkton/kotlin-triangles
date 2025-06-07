@@ -22,13 +22,12 @@ enum class Color(
     ;
 
     companion object {
-        fun fromString(v: String): Color {
-            return try {
+        fun fromString(v: String): Color =
+            try {
                 Color.valueOf(v)
             } catch (e: IllegalArgumentException) {
                 throw IllegalArgumentException("Invalid color: '$v'. Available colors are: ${Color.entries.joinToString()}")
             }
-        }
 
         fun fromRgbString(rgb: String): Color? {
             val intRgb = rgb.replace("#", "").toLong(16).toInt()

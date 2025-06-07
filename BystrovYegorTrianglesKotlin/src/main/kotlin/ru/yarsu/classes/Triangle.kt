@@ -3,7 +3,7 @@ package ru.yarsu.classes
 import com.fasterxml.jackson.annotation.JsonProperty
 import ru.yarsu.enums.Color
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class Triangle constructor(
     @JsonProperty("Id")

@@ -2,7 +2,7 @@ package ru.yarsu.classes
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import ru.yarsu.enums.Type
-import java.util.*
+import java.util.UUID
 
 class Template constructor(
     @JsonProperty("Id")
@@ -14,16 +14,12 @@ class Template constructor(
     @JsonProperty("SideC")
     val sideC: Int,
 ) {
-    val area: Double
-        get() = getArea()
-    val type: Type
-        get() = getType()
-
-    fun getArea(): Double {
-        TODO()
-    }
-
-    fun getType(): Type {
-        TODO()
-    }
+    private val area: Double
+        get() {
+            TODO()
+        }
+    private val type: Type
+        get() {
+            TODO()
+        }
 }

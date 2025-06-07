@@ -2,21 +2,18 @@ package ru.yarsu
 
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.ParameterException
-import java.util.*
 import kotlin.system.exitProcess
 
-fun main() {
-    val args = Args()
+fun main(args: Array<String>) {
+    val commandLineArgs = Args()
 
     val jCommander =
         JCommander
             .newBuilder()
-            .addObject(args)
+            .addObject(commandLineArgs)
             .build()
 
     try {
-        // TODO: parse не parse чота и градл не запускается. Как починишь вними словам
-        // Которые дипсик написал по поводу огранизации рутов
         jCommander.parse(*args)
     } catch (e: ParameterException) {
         println("Error: ${e.message}")
@@ -24,28 +21,28 @@ fun main() {
     } catch (e: Exception) {
         exitProcess(-1)
     }
-/*
+    /*
     val taskStorage: TaskStorage?
     try {
-        taskStorage = TaskStorage(args.tasksFile ?: "")
+        taskStorage = TaskStorage(commandLineArgs.tasksFile ?: "")
     } catch (e: Exception) {
         exitProcess(-1)
         return
     }
     val categoryStorage: CategoryStorage?
     try {
-        categoryStorage = CategoryStorage(args.categoriesFile ?: "")
+        categoryStorage = CategoryStorage(commandLineArgs.categoriesFile ?: "")
     } catch (e: Exception) {
         exitProcess(-1)
         return
     }
 
     val hourInMs = 3600000L
-    val jwtTools = JwtTools(args.secret ?: "", "ru.yarsu", hourInMs)
+    val jwtTools = JwtTools(commandLineArgs.secret ?: "", "ru.yarsu", hourInMs)
 
     val userStorage: UserStorage?
     try {
-        userStorage = UserStorage(args.usersFile ?: "", jwtTools)
+        userStorage = UserStorage(commandLineArgs.usersFile ?: "", jwtTools)
     } catch (e: Exception) {
         exitProcess(-1)
         return
@@ -339,5 +336,5 @@ fun main() {
         )
 
     app.asServer(Jetty(9000)).start()
- */
+    */
 }

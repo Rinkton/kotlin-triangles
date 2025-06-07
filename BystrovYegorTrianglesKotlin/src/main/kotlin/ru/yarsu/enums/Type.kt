@@ -10,11 +10,10 @@ enum class Type(
     OBTUSE_ANGLED("Тупоугольный"),
     ;
 
-    fun fromString(v: String): Type {
-        return try {
+    fun fromString(v: String): Type =
+        try {
             Type.valueOf(v)
         } catch (e: IllegalArgumentException) {
             throw IllegalArgumentException("Invalid type: '$v'. Available types are: ${Type.entries.joinToString()}")
         }
-    }
 }

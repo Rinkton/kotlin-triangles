@@ -1,17 +1,14 @@
 package ru.yarsu.storages
 
 import ru.yarsu.classes.Triangle
-import ru.yarsu.classes.User
 import ru.yarsu.enums.Color
-import ru.yarsu.enums.Role
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.collections.ArrayList
 
 class TriangleStorage(
     filePath: String,
-) : Storage(filePath)
-{
+) : Storage(filePath) {
     private val triangles = ArrayList<Triangle>()
 
     override fun fillUpStoragesWithDicts(dicts: List<Map<String, String>>) {
