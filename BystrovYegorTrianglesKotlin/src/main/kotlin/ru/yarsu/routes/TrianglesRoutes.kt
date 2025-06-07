@@ -5,6 +5,7 @@ import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.routing.bind
 import org.http4k.routing.routes
+import ru.yarsu.paginatedOutputWithResponse
 import ru.yarsu.storages.TemplateStorage
 import ru.yarsu.storages.TriangleStorage
 import ru.yarsu.storages.UserStorage
@@ -16,16 +17,17 @@ fun trianglesRoutes(
 ) = routes(
     "/v3/triangles" bind
             routes(
-                getTriangles(),
+                getTriangles(triangleStorage),
                 postTriangle(),
                 getTriangleById(),
             ),
 )
 
-private fun getTriangles() =
+private fun getTriangles(triangleStorage: TriangleStorage) =
     "".bind(Method.GET) to withErrorHandling {
-        throw BadRequestException("No")
-        Response(Status.NO_CONTENT)
+        // get all datas and pass it to array list then check if it awaits for page and records-per-page
+        val getTrianglesDatas = triangleStorage.getTriangles().forEach()
+        paginatedOutputWithResponse(it, ArrayList())
     }
 
 private fun postTriangle() =
