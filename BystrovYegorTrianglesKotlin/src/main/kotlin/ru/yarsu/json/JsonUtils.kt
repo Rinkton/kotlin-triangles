@@ -100,18 +100,15 @@ class JsonUtils {
         }
 
         fun getBodyNotJsonResponse(): Response {
-            val factory: JsonFactory = JsonFactoryBuilder().build()
-            val stringWriter = StringWriter()
-            val outputGenerator: JsonGenerator = factory.createGenerator(stringWriter)
-            outputGenerator.prettyPrinter = DefaultPrettyPrinter()
-            with(outputGenerator) {
+            val lowLevelJson = LowLevelJson()
+            with(lowLevelJson.outputGenerator) {
                 writeStartObject()
                 writeStringField("Value", "{")
                 writeStringField("Error", "Missing a name for object member.")
                 writeEndObject()
                 close()
             }
-            return Response(Status.BAD_REQUEST).body(stringWriter.toString())
+            return Response(Status.BAD_REQUEST).body(lowLevelJson.stringWriter.toString())
         }
 
         fun getBasicErrorJsonResponse(errorText: String): Response {

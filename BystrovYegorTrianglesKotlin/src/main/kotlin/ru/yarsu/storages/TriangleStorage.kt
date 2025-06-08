@@ -27,4 +27,12 @@ class TriangleStorage(
     }
 
     fun getTriangles() = items
+
+    fun addTriangle(triangle: Triangle) {
+        items.add(triangle)
+    }
+
+    fun getTriangleById(triangleId: UUID): Triangle? {
+        return items.find { it.id == triangleId }
+    }
 }

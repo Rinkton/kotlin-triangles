@@ -20,4 +20,8 @@ class TemplateStorage(
             items.add(template)
         }
     }
+
+    fun getTemplateById(template: UUID): Template? {
+        return items.find { it.id == template }
+    }
 }
