@@ -2,6 +2,7 @@ package ru.yarsu.storages
 
 import ru.yarsu.classes.Triangle
 import ru.yarsu.enums.Color
+import ru.yarsu.enums.Type
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.collections.ArrayList
@@ -47,6 +48,13 @@ class TriangleStorage(
         return ArrayList(trianglesSortedWithBorderColor)
     }
 
+    fun getTrianglesSortedByFillColor(color: Color): ArrayList<Triangle> {
+        val trianglesSortedWithFillolor = items
+            .filter { it.fillColor == color }
+            .sortedWith(compareBy { it.fillColor.toString() })
+        return ArrayList(trianglesSortedWithFillolor)
+    }
+
     fun getTrianglesSortedByArea(areaMin: Double, areaMax: Double, templateStorage: TemplateStorage): ArrayList<Triangle> {
         val filteredTriangles = ArrayList<Triangle>()
         for (triangle in items) {
@@ -62,5 +70,20 @@ class TriangleStorage(
         val filteredSortedTriangles = ArrayList(filteredTriangles
             .sortedWith(compareBy({ it.registrationDateTime }, { it.id })))
         return ArrayList(filteredSortedTriangles)
+    }
+
+    fun getTrianglesSortedByType(type: Type, templateStorage: TemplateStorage): ArrayList<Triangle> {
+        val filteredTriangles = ArrayList<Triangle>()
+        for (triangle in items) {
+            val template = templateStorage.getTemplateById(triangle.template)
+            if (template == null) {
+                System.err.println("Шаблон не нашёлся, странно")
+            } else {
+                if (template.type == type) {
+                    filteredTriangles.add(triangle)
+                }
+            }
+        }
+        return ArrayList(filteredTriangles)
     }
 }

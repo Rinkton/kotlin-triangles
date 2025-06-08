@@ -12,6 +12,7 @@ import ru.yarsu.datas.GetTrianglesData
 import ru.yarsu.datas.TriangleByAreaData
 import ru.yarsu.datas.TriangleByBorderColorData
 import ru.yarsu.enums.Color
+import ru.yarsu.enums.StatisticsBy
 import ru.yarsu.json.*
 import ru.yarsu.paginatedOutputWithResponse
 import ru.yarsu.storages.TemplateStorage
@@ -258,6 +259,31 @@ private fun getTrianglesStatistics(templateStorage: TemplateStorage,
                                    userStorage: UserStorage,
                                    jwtTools: JwtTools) =
     "/statistics".bind(Method.GET) to withErrorHandling {
-        TODO()
+        val byString = it.query("by")
+        if (byString == null) {
+            JsonUtils.getBasicErrorJsonResponse("Отсутствует параметр by")
+        } else {
+            try {
+                val by = StatisticsBy.fromString(byString)
+                when (by) {
+                    StatisticsBy.COLOR -> {
+                        val lowLevelJson = LowLevelJson()
+                        with(lowLevelJson.outputGenerator) {
+                            writeStartObject()
+                            writeStringField("Value", "{")
+                            writeStringField("Error", "Missing a name for object member.")
+                            writeEndObject()
+                            close()
+                        }
+                        Response(Status.OK)
+                    }
+                    StatisticsBy.TYPE -> Response(Status.OK)
+                    StatisticsBy.COLOR_TYPE -> Response(Status.OK)
+                }
+            } catch (e: IllegalArgumentException) {
+                JsonUtils.getBasicErrorJsonResponse(String.format("Некорректное значение типа статистики. " +
+                        "Для параметра by ожидается значение типа статистики, но получено «%s»", byString))
+            }
+        }
     }
 

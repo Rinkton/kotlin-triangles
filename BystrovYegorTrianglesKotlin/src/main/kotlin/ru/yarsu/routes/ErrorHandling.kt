@@ -12,7 +12,7 @@ fun withErrorHandling(handler: HttpHandler): HttpHandler = { request ->
     } catch (e: NotFoundException) {
         Response(Status.NOT_FOUND).body(e.message ?: "Not found")
     } catch (e: Exception) {
-        Response(Status.INTERNAL_SERVER_ERROR).body("Internal server error")
+        Response(Status.INTERNAL_SERVER_ERROR).body(e.message ?: "")
     }
 }
 

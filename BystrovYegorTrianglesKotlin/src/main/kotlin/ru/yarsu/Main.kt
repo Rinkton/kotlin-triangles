@@ -10,6 +10,7 @@ import org.http4k.server.asServer
 import ru.yarsu.routes.trianglesRoutes
 import ru.yarsu.routes.userRoutes
 import ru.yarsu.json.JwtTools
+import ru.yarsu.routes.templatesRoutes
 import ru.yarsu.storages.TemplateStorage
 import ru.yarsu.storages.TriangleStorage
 import ru.yarsu.storages.UserStorage
@@ -62,6 +63,7 @@ fun main(args: Array<String>) {
             "/ping".bind(Method.GET) to {
                 Response(Status.OK)
             },
+            templatesRoutes(templateStorage, triangleStorage, userStorage, jwtTools),
             trianglesRoutes(templateStorage, triangleStorage, userStorage, jwtTools),
             userRoutes(templateStorage, triangleStorage, userStorage),
         )

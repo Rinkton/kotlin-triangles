@@ -123,6 +123,18 @@ class JsonUtils {
             return Response(Status.NOT_FOUND).body(lowLevelJson.stringWriter.toString())
         }
 
+        fun getTemplateNotFoundResponse(templateIdString: String?): Response {
+            val lowLevelJson = LowLevelJson()
+            with(lowLevelJson.outputGenerator) {
+                writeStartObject()
+                writeStringField("TemplateId", templateIdString)
+                writeStringField("Error", "Шаблон не найден")
+                writeEndObject()
+                close()
+            }
+            return Response(Status.NOT_FOUND).body(lowLevelJson.stringWriter.toString())
+        }
+
         fun getBasicErrorJsonResponse(errorText: String): Response {
             val lowLevelJson = LowLevelJson()
             with(lowLevelJson.outputGenerator) {
