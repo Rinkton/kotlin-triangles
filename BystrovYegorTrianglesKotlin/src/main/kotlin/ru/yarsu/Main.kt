@@ -2,16 +2,14 @@ package ru.yarsu
 
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.ParameterException
-import com.fasterxml.jackson.databind.JsonNode
 import org.http4k.core.*
-import org.http4k.format.Jackson.mapper
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.server.Jetty
 import org.http4k.server.asServer
 import ru.yarsu.routes.trianglesRoutes
 import ru.yarsu.routes.userRoutes
-import ru.yarsu.ru.yarsu.JwtTools
+import ru.yarsu.json.JwtTools
 import ru.yarsu.storages.TemplateStorage
 import ru.yarsu.storages.TriangleStorage
 import ru.yarsu.storages.UserStorage
@@ -64,7 +62,7 @@ fun main(args: Array<String>) {
             "/ping".bind(Method.GET) to {
                 Response(Status.OK)
             },
-            trianglesRoutes(templateStorage, triangleStorage, userStorage),
+            trianglesRoutes(templateStorage, triangleStorage, userStorage, jwtTools),
             userRoutes(templateStorage, triangleStorage, userStorage),
         )
 

@@ -12,7 +12,7 @@ enum class Role(
         fun fromString(v: String): Role {
             val role = Role.entries.find { it.v == v }
             if (role == null) {
-                throw IllegalArgumentException("Invalid role: '$v'. Available roles are: ${entries.joinToString()}")
+                throw IllegalArgumentException("Invalid role: '$v'. Available roles are: ${entries.joinToString() { it.v.toString() }}")
             }
             return role
         }

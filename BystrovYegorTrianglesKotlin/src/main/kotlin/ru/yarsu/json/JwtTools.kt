@@ -1,4 +1,4 @@
-package ru.yarsu.ru.yarsu
+package ru.yarsu.json
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -65,19 +65,18 @@ class JwtTools(
             null
         }
     }
-}
 
-fun getExtractedUserIdAndValidate(
-    request: Request,
-    jwtTools: JwtTools,
-    userStorage: UserStorage,
-): UUID? {
-    val token = request.header("Authorization")
-    if (token != null) {
-        val userId = jwtTools.validateAndExtractUserId(token, userStorage)
-        if (userId != null) {
-            return userId
+    fun getExtractedUserIdAndValidate(
+        request: Request,
+        userStorage: UserStorage,
+    ): UUID? {
+        val token = request.header("Authorization")
+        if (token != null) {
+            val userId = validateAndExtractUserId(token, userStorage)
+            if (userId != null) {
+                return userId
+            }
         }
+        return null
     }
-    return null
 }

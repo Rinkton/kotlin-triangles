@@ -1,6 +1,6 @@
 package ru.yarsu.storages
 
-import ru.yarsu.ru.yarsu.JwtTools
+import ru.yarsu.json.JwtTools
 import ru.yarsu.classes.User
 import ru.yarsu.enums.Role
 import java.time.LocalDateTime
@@ -11,6 +11,12 @@ class UserStorage(
     filePath: String,
     jwtTools: JwtTools,
 ) : Storage<User>(filePath, ArrayList<User>()) {
+    init {
+        for (item in items) {
+            item.token = jwtTools.createToken(item) ?: ""
+            println(item.token) // TODO: Remove it
+        }
+    }
 
     override fun fillUpStoragesWithDicts(dicts: List<Map<String, String>>) {
         for (dict in dicts) {

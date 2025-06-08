@@ -5,6 +5,7 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.format.Jackson.mapper
+import ru.yarsu.json.JsonUtils
 
 enum class RecordsPerPage(
     val v: Int,
@@ -24,7 +25,12 @@ fun paginatedOutputWithResponse(
         // TODO: ДА брухн, тут если некорректен records-per-page пишет, что некорректнен page
         // TODO: Ещё бруно предал
         val page = gotPage?.toInt() ?: 1
-        val recordsPerPage = checkIfIntIsRecordsPerPage(request.query("records-per-page")?.toIntOrNull() ?: 10)
+        val recordsPerPage: Int
+        try {
+            recordsPerPage = checkIfIntIsRecordsPerPage(request.query("records-per-page")?.toIntOrNull() ?: 10)
+        } catch (e: IllegalArgumentException) {
+            return JsonUtils.getBasicErrorJsonResponse(e.message ?: "")
+        }
         val paginatedTasks = whatToOutput.drop(page - 1).take(recordsPerPage)
         val json: JsonNode = mapper.valueToTree(paginatedTasks)
         return Response(Status.OK).body(json.toPrettyString())
@@ -42,7 +48,8 @@ fun paginatedOutputWithResponse(
 fun checkIfIntIsRecordsPerPage(v: Int?): Int {
     val recordsPerPage: RecordsPerPage? = RecordsPerPage.entries.find { it.v == v }
     if (recordsPerPage == null) {
-        val errorMessage = "Records per page isn't found in the specified set of values"
+        val errorMessage = "Records per page isn't found in the specified set of values: " +
+                RecordsPerPage.entries.joinToString() { it.v.toString() }
         System.err.println(errorMessage)
         throw IllegalArgumentException(errorMessage)
     }
