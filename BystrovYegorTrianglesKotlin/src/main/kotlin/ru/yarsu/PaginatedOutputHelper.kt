@@ -21,6 +21,8 @@ fun paginatedOutputWithResponse(
 ): Response {
     val gotPage = request.query("page")
     try {
+        // TODO: ДА брухн, тут если некорректен records-per-page пишет, что некорректнен page
+        // TODO: Ещё бруно предал
         val page = gotPage?.toInt() ?: 1
         val recordsPerPage = checkIfIntIsRecordsPerPage(request.query("records-per-page")?.toIntOrNull() ?: 10)
         val paginatedTasks = whatToOutput.drop(page - 1).take(recordsPerPage)
