@@ -9,6 +9,8 @@ import org.http4k.routing.path
 import org.http4k.routing.routes
 import ru.yarsu.classes.Triangle
 import ru.yarsu.datas.GetTrianglesData
+import ru.yarsu.datas.TriangleByAreaData
+import ru.yarsu.datas.TriangleByBorderColorData
 import ru.yarsu.enums.Color
 import ru.yarsu.json.*
 import ru.yarsu.paginatedOutputWithResponse
@@ -27,9 +29,13 @@ fun trianglesRoutes(
 ) = routes(
     "/v3/triangles" bind
             routes(
+                getTrianglesSortedByBorderColor(templateStorage, triangleStorage, userStorage, jwtTools),
+                getTrianglesSortedByBorderArea(templateStorage, triangleStorage, userStorage, jwtTools),
+                getTrianglesStatistics(templateStorage, triangleStorage, userStorage, jwtTools),
                 getTriangles(triangleStorage),
                 postTriangle(triangleStorage, userStorage, jwtTools),
                 getTriangleById(templateStorage, triangleStorage, userStorage, jwtTools),
+                deleteTriangle(templateStorage, triangleStorage, userStorage, jwtTools),
             ),
 )
 
@@ -104,15 +110,7 @@ private fun getTriangleById(templateStorage: TemplateStorage,
                 val triangleId = UUID.fromString(triangleIdString)
                 val triangle = triangleStorage.getTriangleById(triangleId)
                 if (triangle == null) {
-                    val lowLevelJson = LowLevelJson()
-                    with(lowLevelJson.outputGenerator) {
-                        writeStartObject()
-                        writeStringField("TriangleId", triangleIdString)
-                        writeStringField("Error", "Треугольник не найден")
-                        writeEndObject()
-                        close()
-                    }
-                    Response(Status.NOT_FOUND).body(lowLevelJson.stringWriter.toString())
+                    JsonUtils.getTriangleNotFoundResponse(triangleIdString)
                 } else {
                     val template = templateStorage.getTemplateById(triangle.template)
                     if (template == null) {
@@ -154,5 +152,112 @@ private fun getTriangleById(templateStorage: TemplateStorage,
         } else {
             Response(Status.UNAUTHORIZED)
         }
+    }
+
+private fun deleteTriangle(templateStorage: TemplateStorage,
+                           triangleStorage: TriangleStorage,
+                           userStorage: UserStorage,
+                           jwtTools: JwtTools) =
+    "/{triangle-id}".bind(Method.DELETE) to withErrorHandling {
+        var userId = jwtTools.getExtractedUserIdAndValidate(it, userStorage)
+        if (userId != null) {
+            val triangleIdString = it.path("triangle-id")
+            try {
+                val triangleId = UUID.fromString(triangleIdString)
+                val triangle = triangleStorage.getTriangleById(triangleId)
+                if (triangle == null) {
+                    JsonUtils.getTriangleNotFoundResponse(triangleIdString)
+                } else {
+                    triangleStorage.deleteTriangle(triangle)
+                    Response(Status.NO_CONTENT)
+                }
+            } catch (e: IllegalArgumentException) {
+                JsonUtils.getBasicErrorJsonResponse("Некорректное значение переданного параметра triangle-id. " +
+                        "Ожидается UUID, но получено текстовое значение")
+            }
+        } else {
+            Response(Status.UNAUTHORIZED)
+        }
+    }
+
+private fun getTrianglesSortedByBorderColor(templateStorage: TemplateStorage,
+                                            triangleStorage: TriangleStorage,
+                                            userStorage: UserStorage,
+                                            jwtTools: JwtTools) =
+    "/by-border-color".bind(Method.GET) to withErrorHandling {
+        val borderColorString = it.query("border-color")
+        try {
+            val color = Color.fromString(borderColorString ?: "")
+            val triangles = triangleStorage.getTrianglesSortedByBorderColor(color)
+            val triangleByBorderColorDatas = ArrayList<TriangleByBorderColorData>()
+            for (triangle in triangles) {
+                val template = templateStorage.getTemplateById(triangle.template)
+                if (template == null) {
+                    System.err.println("Нету шаблона, странно")
+                } else {
+                    triangleByBorderColorDatas.add(TriangleByBorderColorData(
+                        triangle.id,
+                        template.sideA,
+                        template.sideB,
+                        template.sideC,
+                    ))
+                }
+            }
+            paginatedOutputWithResponse(it, ArrayList(triangleByBorderColorDatas))
+        } catch (e: IllegalArgumentException) {
+            JsonUtils.getBasicErrorJsonResponse("Некорректное значение переданного параметра border-color. " +
+                    "Ожидается Color, но получено текстовое значение")
+        }
+    }
+
+private fun getTrianglesSortedByBorderArea(templateStorage: TemplateStorage,
+                                           triangleStorage: TriangleStorage,
+                                           userStorage: UserStorage,
+                                           jwtTools: JwtTools) =
+    "/by-area".bind(Method.GET) to withErrorHandling {
+        val areaMinString = it.query("area-min")
+        val areaMaxString = it.query("area-max")
+        if (areaMinString == null || areaMaxString == null) {
+            JsonUtils.getBasicErrorJsonResponse("Отсутствуют параметры area-min и area-max")
+        } else {
+            val areaMin = areaMinString.toDoubleOrNull()
+            val areaMax = areaMaxString.toDoubleOrNull()
+            if (areaMin == null || areaMax == null) {
+                if (areaMin == null) {
+                    JsonUtils.getBasicErrorJsonResponse(String.format("Некорректное значение нижней границы площади. " +
+                            "Для параметра area-min ожидается число, " +
+                            "но получено текстовое значение «%s»", areaMinString))
+                } else {
+                    JsonUtils.getBasicErrorJsonResponse(String.format("Некорректное значение верхней границы площади. " +
+                            "Для параметра area-max ожидается число, " +
+                            "но получено текстовое значение «%s»", areaMaxString))
+                }
+            } else {
+                val triangles = triangleStorage.getTrianglesSortedByArea(areaMin, areaMax, templateStorage)
+                val triangleByAreaDatas = ArrayList<TriangleByAreaData>()
+                for (triangle in triangles) {
+                    val template = templateStorage.getTemplateById(triangle.template)
+                    if (template == null) {
+                        System.err.println("Нету шаблона, странно")
+                    } else {
+                        triangleByAreaDatas.add(TriangleByAreaData(
+                            triangle.id,
+                            template.sideA,
+                            template.sideB,
+                            template.sideC,
+                        ))
+                    }
+                }
+                paginatedOutputWithResponse(it, ArrayList(triangleByAreaDatas))
+            }
+        }
+    }
+
+private fun getTrianglesStatistics(templateStorage: TemplateStorage,
+                                   triangleStorage: TriangleStorage,
+                                   userStorage: UserStorage,
+                                   jwtTools: JwtTools) =
+    "/statistics".bind(Method.GET) to withErrorHandling {
+        TODO()
     }
 

@@ -111,6 +111,18 @@ class JsonUtils {
             return Response(Status.BAD_REQUEST).body(lowLevelJson.stringWriter.toString())
         }
 
+        fun getTriangleNotFoundResponse(triangleIdString: String?): Response {
+            val lowLevelJson = LowLevelJson()
+            with(lowLevelJson.outputGenerator) {
+                writeStartObject()
+                writeStringField("TriangleId", triangleIdString)
+                writeStringField("Error", "Треугольник не найден")
+                writeEndObject()
+                close()
+            }
+            return Response(Status.NOT_FOUND).body(lowLevelJson.stringWriter.toString())
+        }
+
         fun getBasicErrorJsonResponse(errorText: String): Response {
             val lowLevelJson = LowLevelJson()
             with(lowLevelJson.outputGenerator) {

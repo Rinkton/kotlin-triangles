@@ -35,4 +35,32 @@ class TriangleStorage(
     fun getTriangleById(triangleId: UUID): Triangle? {
         return items.find { it.id == triangleId }
     }
+
+    fun deleteTriangle(triangle: Triangle) {
+        items.remove(triangle)
+    }
+
+    fun getTrianglesSortedByBorderColor(color: Color): ArrayList<Triangle> {
+        val trianglesSortedWithBorderColor = items
+            .filter { it.borderColor == color }
+            .sortedWith(compareBy({ it.registrationDateTime }, { it.id }))
+        return ArrayList(trianglesSortedWithBorderColor)
+    }
+
+    fun getTrianglesSortedByArea(areaMin: Double, areaMax: Double, templateStorage: TemplateStorage): ArrayList<Triangle> {
+        val filteredTriangles = ArrayList<Triangle>()
+        for (triangle in items) {
+            val template = templateStorage.getTemplateById(triangle.template)
+            if (template == null) {
+                System.err.println("Шаблон не нашёлся, странно")
+            } else {
+                if (template.area >= areaMin && template.area <= areaMax) {
+                    filteredTriangles.add(triangle)
+                }
+            }
+        }
+        val filteredSortedTriangles = ArrayList(filteredTriangles
+            .sortedWith(compareBy({ it.registrationDateTime }, { it.id })))
+        return ArrayList(filteredSortedTriangles)
+    }
 }
