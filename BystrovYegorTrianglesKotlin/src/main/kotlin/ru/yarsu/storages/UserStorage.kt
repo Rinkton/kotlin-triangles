@@ -1,8 +1,8 @@
 package ru.yarsu.storages
 
-import ru.yarsu.json.JwtTools
 import ru.yarsu.classes.User
 import ru.yarsu.enums.Role
+import ru.yarsu.json.JwtTools
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.collections.ArrayList
@@ -14,7 +14,7 @@ class UserStorage(
     init {
         for (item in items) {
             item.token = jwtTools.createToken(item) ?: ""
-            println(item.token) // TODO: Remove it
+            // println(item.token) // TODO: Remove it
         }
     }
 
@@ -38,7 +38,10 @@ class UserStorage(
 
     fun getUserById(id: UUID?): User? = items.find { it.id == id }
 
-    fun getIdOfExistingUserWithSameLoginOrId(userId: UUID, login: String): UUID? {
+    fun getIdOfExistingUserWithSameLoginOrId(
+        userId: UUID,
+        login: String,
+    ): UUID? {
         for (user in items) {
             if (user.id == userId || user.login == login) {
                 return user.id

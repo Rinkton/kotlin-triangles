@@ -8,7 +8,7 @@ import kotlin.system.exitProcess
 
 open class Storage<T>(
     filePath: String,
-    protected val items: ArrayList<T>
+    protected val items: ArrayList<T>,
 ) {
     init {
         val file = getFile(filePath)

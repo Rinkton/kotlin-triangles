@@ -1,8 +1,7 @@
 package ru.yarsu.datas
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class TriangleByBorderColorData constructor(
     @JsonProperty("Id")

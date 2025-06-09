@@ -10,7 +10,6 @@ import kotlin.collections.ArrayList
 class TriangleStorage(
     filePath: String,
 ) : Storage<Triangle>(filePath, ArrayList()) {
-
     override fun fillUpStoragesWithDicts(dicts: List<Map<String, String>>) {
         for (dict in dicts) {
             val triangle =
@@ -33,29 +32,33 @@ class TriangleStorage(
         items.add(triangle)
     }
 
-    fun getTriangleById(triangleId: UUID): Triangle? {
-        return items.find { it.id == triangleId }
-    }
+    fun getTriangleById(triangleId: UUID): Triangle? = items.find { it.id == triangleId }
 
     fun deleteTriangle(triangle: Triangle) {
         items.remove(triangle)
     }
 
     fun getTrianglesSortedByBorderColor(color: Color): ArrayList<Triangle> {
-        val trianglesSortedWithBorderColor = items
-            .filter { it.borderColor == color }
-            .sortedWith(compareBy({ it.registrationDateTime }, { it.id }))
+        val trianglesSortedWithBorderColor =
+            items
+                .filter { it.borderColor == color }
+                .sortedWith(compareBy({ it.registrationDateTime }, { it.id }))
         return ArrayList(trianglesSortedWithBorderColor)
     }
 
     fun getTrianglesSortedByFillColor(color: Color): ArrayList<Triangle> {
-        val trianglesSortedWithFillolor = items
-            .filter { it.fillColor == color }
-            .sortedWith(compareBy { it.fillColor.toString() })
+        val trianglesSortedWithFillolor =
+            items
+                .filter { it.fillColor == color }
+                .sortedWith(compareBy { it.fillColor.toString() })
         return ArrayList(trianglesSortedWithFillolor)
     }
 
-    fun getTrianglesSortedByArea(areaMin: Double, areaMax: Double, templateStorage: TemplateStorage): ArrayList<Triangle> {
+    fun getTrianglesSortedByArea(
+        areaMin: Double,
+        areaMax: Double,
+        templateStorage: TemplateStorage,
+    ): ArrayList<Triangle> {
         val filteredTriangles = ArrayList<Triangle>()
         for (triangle in items) {
             val template = templateStorage.getTemplateById(triangle.template)
@@ -67,12 +70,18 @@ class TriangleStorage(
                 }
             }
         }
-        val filteredSortedTriangles = ArrayList(filteredTriangles
-            .sortedWith(compareBy({ it.registrationDateTime }, { it.id })))
+        val filteredSortedTriangles =
+            ArrayList(
+                filteredTriangles
+                    .sortedWith(compareBy({ it.registrationDateTime }, { it.id })),
+            )
         return ArrayList(filteredSortedTriangles)
     }
 
-    fun getTrianglesSortedByType(type: Type, templateStorage: TemplateStorage): ArrayList<Triangle> {
+    fun getTrianglesSortedByType(
+        type: Type,
+        templateStorage: TemplateStorage,
+    ): ArrayList<Triangle> {
         val filteredTriangles = ArrayList<Triangle>()
         for (triangle in items) {
             val template = templateStorage.getTemplateById(triangle.template)

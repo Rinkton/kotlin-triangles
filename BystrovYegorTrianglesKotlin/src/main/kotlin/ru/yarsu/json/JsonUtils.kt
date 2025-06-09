@@ -34,7 +34,10 @@ class LowLevelJson {
 class JsonUtils {
     companion object {
         // Parses json node, check for all the problems. If no problems returns null
-        fun getErrorJson(json: JsonNode, params: ArrayList<JsonParseDataObject>): ObjectNode? {
+        fun getErrorJson(
+            json: JsonNode,
+            params: ArrayList<JsonParseDataObject>,
+        ): ObjectNode? {
             val errorJson = mapper.createObjectNode()
             for (param in params) {
                 if (json.has(param.fieldName)) {
@@ -42,26 +45,36 @@ class JsonUtils {
                     if (!getIsObjectNodeIsOfJsonParseType(field, param.jsonParseType)) {
                         val russianTypeNameExpected = param.jsonParseType.v
                         val russianTypeNameActual = "строка"
-                        val paramJson = mapper.createObjectNode().apply {
-                            put("Value", json.get(param.fieldName).asText())
-                            put("Error", String.format("Ожидается %s, но получена %s", russianTypeNameExpected,
-                                russianTypeNameActual))
-                        }
+                        val paramJson =
+                            mapper.createObjectNode().apply {
+                                put("Value", json.get(param.fieldName).asText())
+                                put(
+                                    "Error",
+                                    String.format(
+                                        "Ожидается %s, но получена %s",
+                                        russianTypeNameExpected,
+                                        russianTypeNameActual,
+                                    ),
+                                )
+                            }
                         errorJson.set<ObjectNode>(param.fieldName, paramJson)
                     }
-                }
-                else if (param.required) {
-                    val paramJson = mapper.createObjectNode().apply {
-                        putNull("Value")
-                        put("Error", String.format("В теле запроса отсутствует поле %s", param.fieldName))
-                    }
+                } else if (param.required) {
+                    val paramJson =
+                        mapper.createObjectNode().apply {
+                            putNull("Value")
+                            put("Error", String.format("В теле запроса отсутствует поле %s", param.fieldName))
+                        }
                     errorJson.set<ObjectNode>(param.fieldName, paramJson)
                 }
             }
             return if (!errorJson.isEmpty) errorJson else null
         }
 
-        fun getIsObjectNodeIsOfJsonParseType(jsonNode: JsonNode, jsonParseType: JsonParseType): Boolean {
+        fun getIsObjectNodeIsOfJsonParseType(
+            jsonNode: JsonNode,
+            jsonParseType: JsonParseType,
+        ): Boolean {
             when (jsonParseType) {
                 JsonParseType.STRING -> return jsonNode.isTextual
                 JsonParseType.NUMBER -> return jsonNode.isNumber

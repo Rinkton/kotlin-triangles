@@ -11,36 +11,42 @@ import ru.yarsu.classes.Template
 import ru.yarsu.classes.Triangle
 import ru.yarsu.datas.GetTemplatesData
 import ru.yarsu.enums.Color
-import ru.yarsu.json.*
+import ru.yarsu.json.JsonParseDataObject
+import ru.yarsu.json.JsonParseType
+import ru.yarsu.json.JsonUtils
+import ru.yarsu.json.JwtTools
+import ru.yarsu.json.LowLevelJson
 import ru.yarsu.paginatedOutputWithResponse
 import ru.yarsu.storages.TemplateStorage
 import ru.yarsu.storages.TriangleStorage
 import ru.yarsu.storages.UserStorage
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.collections.ArrayList
 
 fun templatesRoutes(
     templateStorage: TemplateStorage,
     triangleStorage: TriangleStorage,
     userStorage: UserStorage,
-    jwtTools: JwtTools
+    jwtTools: JwtTools,
 ) = routes(
     "/v3/templates" bind
-            routes(
-                createTriangleWithTemplate(templateStorage, triangleStorage, userStorage, jwtTools),
-                getTemplates(templateStorage, triangleStorage, userStorage, jwtTools),
-                postTemplate(templateStorage, triangleStorage, userStorage, jwtTools),
-                getTemplateById(templateStorage, triangleStorage, userStorage, jwtTools),
-                putTemplate(templateStorage, triangleStorage, userStorage, jwtTools),
-            ),
+        routes(
+            createTriangleWithTemplate(templateStorage, triangleStorage, userStorage, jwtTools),
+            getTemplates(templateStorage, triangleStorage, userStorage, jwtTools),
+            postTemplate(templateStorage, triangleStorage, userStorage, jwtTools),
+            getTemplateById(templateStorage, triangleStorage, userStorage, jwtTools),
+            putTemplate(templateStorage, triangleStorage, userStorage, jwtTools),
+        ),
 )
 
-private fun createTriangleWithTemplate(templateStorage: TemplateStorage,
-                                       triangleStorage: TriangleStorage,
-                                       userStorage: UserStorage,
-                                       jwtTools: JwtTools) =
-    "/{template-id}/triangles".bind(Method.POST) to withErrorHandling {
+private fun createTriangleWithTemplate(
+    templateStorage: TemplateStorage,
+    triangleStorage: TriangleStorage,
+    userStorage: UserStorage,
+    jwtTools: JwtTools,
+) = "/{template-id}/triangles".bind(Method.POST) to
+    withErrorHandling {
         var userId = jwtTools.getExtractedUserIdAndValidate(it, userStorage)
         if (userId != null) {
             val json = JsonUtils.getJsonNode(it)
@@ -52,25 +58,33 @@ private fun createTriangleWithTemplate(templateStorage: TemplateStorage,
                     if (template == null) {
                         JsonUtils.getTemplateNotFoundResponse(templateIdString)
                     } else {
-                        val errorJson = JsonUtils.getErrorJson(json, arrayListOf(
-                            JsonParseDataObject("RegistrationDateTime", false, JsonParseType.DATE_TIME),
-                            JsonParseDataObject("BorderColor", true, JsonParseType.COLOR),
-                            JsonParseDataObject("FillColor", true, JsonParseType.COLOR),
-                            JsonParseDataObject("Description", true, JsonParseType.STRING),
-                        ))
+                        val errorJson =
+                            JsonUtils.getErrorJson(
+                                json,
+                                arrayListOf(
+                                    JsonParseDataObject("RegistrationDateTime", false, JsonParseType.DATE_TIME),
+                                    JsonParseDataObject("BorderColor", true, JsonParseType.COLOR),
+                                    JsonParseDataObject("FillColor", true, JsonParseType.COLOR),
+                                    JsonParseDataObject("Description", true, JsonParseType.STRING),
+                                ),
+                            )
                         if (errorJson == null) {
                             val isRegistrationDateTimeSet = json.get("RegistrationDateTime") != null
                             val newId = UUID.randomUUID()
-                            val triangle = Triangle(
-                                newId,
-                                templateId,
-                                if (isRegistrationDateTimeSet) LocalDateTime.parse(json.get("RegistrationDateTime").asText())
-                                else LocalDateTime.now(),
-                                Color.fromString(json.get("BorderColor").asText()),
-                                Color.fromString(json.get("FillColor").asText()),
-                                json.get("Description").asText(),
-                                userId
-                            )
+                            val triangle =
+                                Triangle(
+                                    newId,
+                                    templateId,
+                                    if (isRegistrationDateTimeSet) {
+                                        LocalDateTime.parse(json.get("RegistrationDateTime").asText())
+                                    } else {
+                                        LocalDateTime.now()
+                                    },
+                                    Color.fromString(json.get("BorderColor").asText()),
+                                    Color.fromString(json.get("FillColor").asText()),
+                                    json.get("Description").asText(),
+                                    userId,
+                                )
                             triangleStorage.addTriangle(triangle)
                             val lowLevelJson = LowLevelJson()
                             with(lowLevelJson.outputGenerator) {
@@ -85,8 +99,10 @@ private fun createTriangleWithTemplate(templateStorage: TemplateStorage,
                         }
                     }
                 } catch (e: IllegalArgumentException) {
-                    JsonUtils.getBasicErrorJsonResponse("Некорректное значение переданного параметра template-id. " +
-                            "Ожидается UUID, но получено текстовое значение")
+                    JsonUtils.getBasicErrorJsonResponse(
+                        "Некорректное значение переданного параметра template-id. " +
+                            "Ожидается UUID, но получено текстовое значение",
+                    )
                 }
             } else {
                 JsonUtils.getBodyNotJsonResponse()
@@ -96,43 +112,54 @@ private fun createTriangleWithTemplate(templateStorage: TemplateStorage,
         }
     }
 
-private fun getTemplates(templateStorage: TemplateStorage,
-                         triangleStorage: TriangleStorage,
-                         userStorage: UserStorage,
-                         jwtTools: JwtTools) =
-    "".bind(Method.GET) to withErrorHandling {
-        val getTemplatesDatas = templateStorage.getTemplates().map { template ->
-            GetTemplatesData(
-                template.id,
-                template.sideA,
-                template.sideB,
-                template.sideC,
-            )
-        }
-            .sortedWith(compareBy { it.id.toString() } )
-            .toCollection(ArrayList())
+private fun getTemplates(
+    templateStorage: TemplateStorage,
+    triangleStorage: TriangleStorage,
+    userStorage: UserStorage,
+    jwtTools: JwtTools,
+) = "".bind(Method.GET) to
+    withErrorHandling {
+        val getTemplatesDatas =
+            templateStorage
+                .getTemplates()
+                .map { template ->
+                    GetTemplatesData(
+                        template.id,
+                        template.sideA,
+                        template.sideB,
+                        template.sideC,
+                    )
+                }.sortedWith(compareBy { it.id.toString() })
+                .toCollection(ArrayList())
         paginatedOutputWithResponse(it, ArrayList(getTemplatesDatas))
     }
 
-private fun postTemplate(templateStorage: TemplateStorage,
-                         triangleStorage: TriangleStorage,
-                         userStorage: UserStorage,
-                         jwtTools: JwtTools) =
-    "".bind(Method.POST) to withErrorHandling {
+private fun postTemplate(
+    templateStorage: TemplateStorage,
+    triangleStorage: TriangleStorage,
+    userStorage: UserStorage,
+    jwtTools: JwtTools,
+) = "".bind(Method.POST) to
+    withErrorHandling {
         var userId = jwtTools.getExtractedUserIdAndValidate(it, userStorage)
         if (userId != null) {
             val json = JsonUtils.getJsonNode(it)
             if (json != null) {
-                val errorJson = JsonUtils.getErrorJson(json, arrayListOf(
-                    JsonParseDataObject("SideA", true, JsonParseType.NUMBER),
-                    JsonParseDataObject("SideB", true, JsonParseType.NUMBER),
-                    JsonParseDataObject("SideC", true, JsonParseType.NUMBER),
-                ))
+                val errorJson =
+                    JsonUtils.getErrorJson(
+                        json,
+                        arrayListOf(
+                            JsonParseDataObject("SideA", true, JsonParseType.NUMBER),
+                            JsonParseDataObject("SideB", true, JsonParseType.NUMBER),
+                            JsonParseDataObject("SideC", true, JsonParseType.NUMBER),
+                        ),
+                    )
                 if (errorJson == null) {
-                    val idOfExistingTemplateWithSameSides = templateStorage.getIdOfExistingTemplateWithSameSides(
-                        json.get("SideA").asText().toInt(),
-                        json.get("SideB").asText().toInt(),
-                        json.get("SideC").asText().toInt(),
+                    val idOfExistingTemplateWithSameSides =
+                        templateStorage.getIdOfExistingTemplateWithSameSides(
+                            json.get("SideA").asText().toInt(),
+                            json.get("SideB").asText().toInt(),
+                            json.get("SideC").asText().toInt(),
                         )
                     if (idOfExistingTemplateWithSameSides != null) {
                         val lowLevelJson = LowLevelJson()
@@ -145,12 +172,13 @@ private fun postTemplate(templateStorage: TemplateStorage,
                         Response(Status.CONFLICT).body(lowLevelJson.stringWriter.toString())
                     } else {
                         val newId = UUID.randomUUID()
-                        val template = Template(
-                            newId,
-                            json.get("SideA").asText().toInt(),
-                            json.get("SideB").asText().toInt(),
-                            json.get("SideC").asText().toInt(),
-                        )
+                        val template =
+                            Template(
+                                newId,
+                                json.get("SideA").asText().toInt(),
+                                json.get("SideB").asText().toInt(),
+                                json.get("SideC").asText().toInt(),
+                            )
                         templateStorage.addTemplate(template)
                         val lowLevelJson = LowLevelJson()
                         with(lowLevelJson.outputGenerator) {
@@ -172,11 +200,13 @@ private fun postTemplate(templateStorage: TemplateStorage,
         }
     }
 
-private fun getTemplateById(templateStorage: TemplateStorage,
-                            triangleStorage: TriangleStorage,
-                            userStorage: UserStorage,
-                            jwtTools: JwtTools) =
-    "/{template-id}".bind(Method.GET) to withErrorHandling {
+private fun getTemplateById(
+    templateStorage: TemplateStorage,
+    triangleStorage: TriangleStorage,
+    userStorage: UserStorage,
+    jwtTools: JwtTools,
+) = "/{template-id}".bind(Method.GET) to
+    withErrorHandling {
         var userId = jwtTools.getExtractedUserIdAndValidate(it, userStorage)
         if (userId != null) {
             val templateIdString = it.path("template-id")
@@ -201,19 +231,23 @@ private fun getTemplateById(templateStorage: TemplateStorage,
                     Response(Status.OK).body(lowLevelJson.stringWriter.toString())
                 }
             } catch (e: IllegalArgumentException) {
-                JsonUtils.getBasicErrorJsonResponse("Некорректное значение переданного параметра template-id. " +
-                        "Ожидается UUID, но получено текстовое значение")
+                JsonUtils.getBasicErrorJsonResponse(
+                    "Некорректное значение переданного параметра template-id. " +
+                        "Ожидается UUID, но получено текстовое значение",
+                )
             }
         } else {
             Response(Status.UNAUTHORIZED)
         }
     }
 
-private fun putTemplate(templateStorage: TemplateStorage,
-                        triangleStorage: TriangleStorage,
-                        userStorage: UserStorage,
-                        jwtTools: JwtTools) =
-    "/{template-id}".bind(Method.PUT) to withErrorHandling {
+private fun putTemplate(
+    templateStorage: TemplateStorage,
+    triangleStorage: TriangleStorage,
+    userStorage: UserStorage,
+    jwtTools: JwtTools,
+) = "/{template-id}".bind(Method.PUT) to
+    withErrorHandling {
         var userId = jwtTools.getExtractedUserIdAndValidate(it, userStorage)
         if (userId != null) {
             val templateIdString = it.path("template-id")
@@ -221,17 +255,22 @@ private fun putTemplate(templateStorage: TemplateStorage,
                 val templateId = UUID.fromString(templateIdString)
                 val json = JsonUtils.getJsonNode(it)
                 if (json != null) {
-                    val errorJson = JsonUtils.getErrorJson(json, arrayListOf(
-                        JsonParseDataObject("SideA", true, JsonParseType.NUMBER),
-                        JsonParseDataObject("SideB", true, JsonParseType.NUMBER),
-                        JsonParseDataObject("SideC", true, JsonParseType.NUMBER),
-                    ))
-                    if (errorJson == null) {
-                        val idOfExistingTemplateWithSameSides = templateStorage.getIdOfExistingTemplateWithSameSides(
-                            json.get("SideA").asText().toInt(),
-                            json.get("SideB").asText().toInt(),
-                            json.get("SideC").asText().toInt(),
+                    val errorJson =
+                        JsonUtils.getErrorJson(
+                            json,
+                            arrayListOf(
+                                JsonParseDataObject("SideA", true, JsonParseType.NUMBER),
+                                JsonParseDataObject("SideB", true, JsonParseType.NUMBER),
+                                JsonParseDataObject("SideC", true, JsonParseType.NUMBER),
+                            ),
                         )
+                    if (errorJson == null) {
+                        val idOfExistingTemplateWithSameSides =
+                            templateStorage.getIdOfExistingTemplateWithSameSides(
+                                json.get("SideA").asText().toInt(),
+                                json.get("SideB").asText().toInt(),
+                                json.get("SideC").asText().toInt(),
+                            )
                         if (idOfExistingTemplateWithSameSides != null) {
                             val lowLevelJson = LowLevelJson()
                             with(lowLevelJson.outputGenerator) {
@@ -242,12 +281,13 @@ private fun putTemplate(templateStorage: TemplateStorage,
                             }
                             Response(Status.CONFLICT).body(lowLevelJson.stringWriter.toString())
                         } else {
-                            val template = Template(
-                                templateId,
-                                json.get("SideA").asText().toInt(),
-                                json.get("SideB").asText().toInt(),
-                                json.get("SideC").asText().toInt(),
-                            )
+                            val template =
+                                Template(
+                                    templateId,
+                                    json.get("SideA").asText().toInt(),
+                                    json.get("SideB").asText().toInt(),
+                                    json.get("SideC").asText().toInt(),
+                                )
                             templateStorage.putTemplate(template)
                             Response(Status.NO_CONTENT)
                         }
@@ -258,8 +298,10 @@ private fun putTemplate(templateStorage: TemplateStorage,
                     JsonUtils.getBodyNotJsonResponse()
                 }
             } catch (e: IllegalArgumentException) {
-                JsonUtils.getBasicErrorJsonResponse("Некорректное значение переданного параметра template-id. " +
-                        "Ожидается UUID, но получено текстовое значение")
+                JsonUtils.getBasicErrorJsonResponse(
+                    "Некорректное значение переданного параметра template-id. " +
+                        "Ожидается UUID, но получено текстовое значение",
+                )
             }
         } else {
             Response(Status.UNAUTHORIZED)

@@ -5,7 +5,7 @@ import ru.yarsu.enums.Color
 import java.time.LocalDateTime
 import java.util.UUID
 
-//TODO: don't forget ktlint and saving csv
+// TODO: don't forget ktlint and saving csv
 class Triangle constructor(
     @JsonProperty("Id")
     val id: UUID,

@@ -22,8 +22,6 @@ fun paginatedOutputWithResponse(
 ): Response {
     val gotPage = request.query("page")
     try {
-        // TODO: ДА брухн, тут если некорректен records-per-page пишет, что некорректнен page
-        // TODO: Ещё бруно предал
         val page = gotPage?.toInt() ?: 1
         val recordsPerPage: Int
         try {
@@ -48,8 +46,9 @@ fun paginatedOutputWithResponse(
 fun checkIfIntIsRecordsPerPage(v: Int?): Int {
     val recordsPerPage: RecordsPerPage? = RecordsPerPage.entries.find { it.v == v }
     if (recordsPerPage == null) {
-        val errorMessage = "Records per page isn't found in the specified set of values: " +
-                RecordsPerPage.entries.joinToString() { it.v.toString() }
+        val errorMessage =
+            "Records per page isn't found in the specified set of values: " +
+                RecordsPerPage.entries.joinToString { it.v.toString() }
         System.err.println(errorMessage)
         throw IllegalArgumentException(errorMessage)
     }

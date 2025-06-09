@@ -9,7 +9,9 @@ import org.http4k.routing.routes
 import ru.yarsu.classes.User
 import ru.yarsu.datas.GetUsersData
 import ru.yarsu.enums.Role
-import ru.yarsu.json.*
+import ru.yarsu.json.JsonUtils
+import ru.yarsu.json.JwtTools
+import ru.yarsu.json.LowLevelJson
 import ru.yarsu.paginatedOutputWithResponse
 import ru.yarsu.storages.TemplateStorage
 import ru.yarsu.storages.TriangleStorage
@@ -17,47 +19,53 @@ import ru.yarsu.storages.UserStorage
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.collections.ArrayList
 
 fun usersRoutes(
     templateStorage: TemplateStorage,
     triangleStorage: TriangleStorage,
     userStorage: UserStorage,
-    jwtTools: JwtTools
+    jwtTools: JwtTools,
 ) = routes(
     "/v3/users" bind
-            routes(
-                getUsers(templateStorage, triangleStorage, userStorage, jwtTools),
-                postUser(templateStorage, triangleStorage, userStorage, jwtTools),
-                putUser(templateStorage, triangleStorage, userStorage, jwtTools),
-                deleteUser(templateStorage, triangleStorage, userStorage, jwtTools),
-            ),
+        routes(
+            getUsers(templateStorage, triangleStorage, userStorage, jwtTools),
+            postUser(templateStorage, triangleStorage, userStorage, jwtTools),
+            putUser(templateStorage, triangleStorage, userStorage, jwtTools),
+            deleteUser(templateStorage, triangleStorage, userStorage, jwtTools),
+        ),
 )
 
-private fun getUsers(templateStorage: TemplateStorage,
-                         triangleStorage: TriangleStorage,
-                         userStorage: UserStorage,
-                         jwtTools: JwtTools) =
-    "".bind(Method.GET) to withErrorHandling {
-        val getUsersData = userStorage.getUsers().map { user ->
-            GetUsersData(
-                user.id,
-                user.login,
-                user.registrationDateTime,
-                user.email
-            )
-        }
-            .sortedWith(compareBy { it.login.toString() } )
-            .toCollection(ArrayList())
+private fun getUsers(
+    templateStorage: TemplateStorage,
+    triangleStorage: TriangleStorage,
+    userStorage: UserStorage,
+    jwtTools: JwtTools,
+) = "".bind(Method.GET) to
+    withErrorHandling {
+        val getUsersData =
+            userStorage
+                .getUsers()
+                .map { user ->
+                    GetUsersData(
+                        user.id,
+                        user.login,
+                        user.registrationDateTime,
+                        user.email,
+                    )
+                }.sortedWith(compareBy { it.login.toString() })
+                .toCollection(ArrayList())
         paginatedOutputWithResponse(it, ArrayList(getUsersData))
     }
 
-private fun postUser(templateStorage: TemplateStorage,
-                         triangleStorage: TriangleStorage,
-                         userStorage: UserStorage,
-                         jwtTools: JwtTools) =
-    "".bind(Method.POST) to withErrorHandling {
+private fun postUser(
+    templateStorage: TemplateStorage,
+    triangleStorage: TriangleStorage,
+    userStorage: UserStorage,
+    jwtTools: JwtTools,
+) = "".bind(Method.POST) to
+    withErrorHandling {
         var userId = jwtTools.getExtractedUserIdAndValidate(it, userStorage)
         if (userId != null) {
             val formBody = it.bodyString()
@@ -66,9 +74,11 @@ private fun postUser(templateStorage: TemplateStorage,
             if (loginFormData != null) {
                 val login = URLDecoder.decode(loginFormData, StandardCharsets.UTF_8.toString())
                 if (login != null) {
-                    val idOfExistingUserWithSameLoginOrId = userStorage.getIdOfExistingUserWithSameLoginOrId(
-                        userId, login
-                    )
+                    val idOfExistingUserWithSameLoginOrId =
+                        userStorage.getIdOfExistingUserWithSameLoginOrId(
+                            userId,
+                            login,
+                        )
                     if (idOfExistingUserWithSameLoginOrId != null) {
                         val lowLevelJson = LowLevelJson()
                         with(lowLevelJson.outputGenerator) {
@@ -80,13 +90,14 @@ private fun postUser(templateStorage: TemplateStorage,
                         Response(Status.CONFLICT).body(lowLevelJson.stringWriter.toString())
                     } else {
                         val newId = UUID.randomUUID()
-                        val user = User(
-                            newId,
-                            login,
-                            LocalDateTime.now(),
-                            "",
-                            Role.USER
-                        )
+                        val user =
+                            User(
+                                newId,
+                                login,
+                                LocalDateTime.now(),
+                                "",
+                                Role.USER,
+                            )
                         userStorage.addUser(user)
                         val lowLevelJson = LowLevelJson()
                         with(lowLevelJson.outputGenerator) {
@@ -108,11 +119,13 @@ private fun postUser(templateStorage: TemplateStorage,
         }
     }
 
-private fun putUser(templateStorage: TemplateStorage,
-                        triangleStorage: TriangleStorage,
-                        userStorage: UserStorage,
-                        jwtTools: JwtTools) =
-    "/{user-id}".bind(Method.PUT) to withErrorHandling {
+private fun putUser(
+    templateStorage: TemplateStorage,
+    triangleStorage: TriangleStorage,
+    userStorage: UserStorage,
+    jwtTools: JwtTools,
+) = "/{user-id}".bind(Method.PUT) to
+    withErrorHandling {
         var userId = jwtTools.getExtractedUserIdAndValidate(it, userStorage)
         if (userId != null) {
             val puttedUserIdString = it.path("user-id")
@@ -120,8 +133,10 @@ private fun putUser(templateStorage: TemplateStorage,
                 val puttedUserId = UUID.fromString(puttedUserIdString)
                 val userRoleString = it.query("user-role")
                 if (userRoleString == null) {
-                    JsonUtils.getBasicErrorJsonResponse("Некорректное значение переданного параметра user-role. " +
-                            "Ожидается UUID, но получено текстовое значение")
+                    JsonUtils.getBasicErrorJsonResponse(
+                        "Некорректное значение переданного параметра user-role. " +
+                            "Ожидается UUID, но получено текстовое значение",
+                    )
                 } else {
                     try {
                         val userRole = Role.fromString(userRoleString)
@@ -129,35 +144,42 @@ private fun putUser(templateStorage: TemplateStorage,
                         if (puttedUser == null) {
                             JsonUtils.getUserNotFoundResponse(puttedUserIdString)
                         } else {
-                            val user = User(
-                                puttedUserId,
-                                puttedUser.login,
-                                puttedUser.registrationDateTime,
-                                puttedUser.email,
-                                userRole
-                            )
+                            val user =
+                                User(
+                                    puttedUserId,
+                                    puttedUser.login,
+                                    puttedUser.registrationDateTime,
+                                    puttedUser.email,
+                                    userRole,
+                                )
                             userStorage.putUser(user)
                             Response(Status.NO_CONTENT)
                         }
                     } catch (e: IllegalArgumentException) {
-                        JsonUtils.getBasicErrorJsonResponse("Некорректное значение переданного параметра user-role. " +
-                                "Ожидается Role, но получено текстовое значение")
+                        JsonUtils.getBasicErrorJsonResponse(
+                            "Некорректное значение переданного параметра user-role. " +
+                                "Ожидается Role, но получено текстовое значение",
+                        )
                     }
                 }
             } catch (e: IllegalArgumentException) {
-                JsonUtils.getBasicErrorJsonResponse("Некорректное значение переданного параметра user-id. " +
-                        "Ожидается UUID, но получено текстовое значение")
+                JsonUtils.getBasicErrorJsonResponse(
+                    "Некорректное значение переданного параметра user-id. " +
+                        "Ожидается UUID, но получено текстовое значение",
+                )
             }
         } else {
             Response(Status.UNAUTHORIZED)
         }
     }
 
-private fun deleteUser(templateStorage: TemplateStorage,
-                           triangleStorage: TriangleStorage,
-                           userStorage: UserStorage,
-                           jwtTools: JwtTools) =
-    "/{user-id}".bind(Method.DELETE) to withErrorHandling {
+private fun deleteUser(
+    templateStorage: TemplateStorage,
+    triangleStorage: TriangleStorage,
+    userStorage: UserStorage,
+    jwtTools: JwtTools,
+) = "/{user-id}".bind(Method.DELETE) to
+    withErrorHandling {
         var userId = jwtTools.getExtractedUserIdAndValidate(it, userStorage)
         if (userId != null) {
             val userToDeleteIdString = it.path("user-id")
@@ -171,8 +193,10 @@ private fun deleteUser(templateStorage: TemplateStorage,
                     Response(Status.NO_CONTENT)
                 }
             } catch (e: IllegalArgumentException) {
-                JsonUtils.getBasicErrorJsonResponse("Некорректное значение переданного параметра user-id. " +
-                        "Ожидается UUID, но получено текстовое значение")
+                JsonUtils.getBasicErrorJsonResponse(
+                    "Некорректное значение переданного параметра user-id. " +
+                        "Ожидается UUID, но получено текстовое значение",
+                )
             }
         } else {
             Response(Status.UNAUTHORIZED)

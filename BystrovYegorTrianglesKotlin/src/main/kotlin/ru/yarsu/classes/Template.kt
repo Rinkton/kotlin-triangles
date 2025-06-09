@@ -43,11 +43,12 @@ class Template constructor(
                 return Type.SEGMENT
             }
 
-            val type = when {
-                a.pow(2) + b.pow(2) > c.pow(2) -> Type.ACUTE_ANGLED
-                a.pow(2) + b.pow(2) == c.pow(2) -> Type.RIGHT_ANGLED
-                else -> Type.OBTUSE_ANGLED
-            }
+            val type =
+                when {
+                    a.pow(2) + b.pow(2) > c.pow(2) -> Type.ACUTE_ANGLED
+                    a.pow(2) + b.pow(2) == c.pow(2) -> Type.RIGHT_ANGLED
+                    else -> Type.OBTUSE_ANGLED
+                }
 
             return type
         }

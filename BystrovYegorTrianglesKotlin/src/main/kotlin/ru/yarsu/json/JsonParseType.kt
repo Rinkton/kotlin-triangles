@@ -1,6 +1,8 @@
 package ru.yarsu.json
 
-enum class JsonParseType(val v: String) {
+enum class JsonParseType(
+    val v: String,
+) {
     STRING("строка"),
     NUMBER("число"),
     BOOLEAN("булевое значение"),

@@ -12,8 +12,10 @@ enum class StatisticsBy(
         fun fromString(v: String): StatisticsBy {
             val statisticsBy = StatisticsBy.entries.find { it.v == v }
             if (statisticsBy == null) {
-                throw IllegalArgumentException("Invalid by: '$v'. Available by are: " +
-                        "${entries.joinToString() { it.v.toString() }}")
+                throw IllegalArgumentException(
+                    "Invalid by: '$v'. Available by are: " +
+                        "${entries.joinToString { it.v.toString() }}",
+                )
             }
             return statisticsBy
         }

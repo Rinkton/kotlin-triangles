@@ -7,7 +7,6 @@ import kotlin.collections.ArrayList
 class TemplateStorage(
     filePath: String,
 ) : Storage<Template>(filePath, ArrayList<Template>()) {
-
     override fun fillUpStoragesWithDicts(dicts: List<Map<String, String>>) {
         for (dict in dicts) {
             val template =
@@ -21,9 +20,7 @@ class TemplateStorage(
         }
     }
 
-    fun getTemplateById(template: UUID): Template? {
-        return items.find { it.id == template }
-    }
+    fun getTemplateById(template: UUID): Template? = items.find { it.id == template }
 
     fun getTemplates() = items
 
@@ -41,7 +38,11 @@ class TemplateStorage(
         }
     }
 
-    fun getIdOfExistingTemplateWithSameSides(sideA: Int, sideB: Int, sideC: Int): UUID? {
+    fun getIdOfExistingTemplateWithSameSides(
+        sideA: Int,
+        sideB: Int,
+        sideC: Int,
+    ): UUID? {
         val sides = listOf(sideA, sideB, sideC).sorted()
         val a = sides[0]
         val b = sides[1]
