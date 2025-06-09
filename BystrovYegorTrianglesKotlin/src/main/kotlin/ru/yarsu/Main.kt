@@ -10,7 +10,7 @@ import org.http4k.server.Http4kServer
 import org.http4k.server.Jetty
 import org.http4k.server.asServer
 import ru.yarsu.routes.trianglesRoutes
-import ru.yarsu.routes.userRoutes
+import ru.yarsu.routes.usersRoutes
 import ru.yarsu.json.JwtTools
 import ru.yarsu.routes.templatesRoutes
 import ru.yarsu.storages.TemplateStorage
@@ -67,7 +67,7 @@ fun main(args: Array<String>) {
             },
             templatesRoutes(templateStorage, triangleStorage, userStorage, jwtTools),
             trianglesRoutes(templateStorage, triangleStorage, userStorage, jwtTools),
-            userRoutes(templateStorage, triangleStorage, userStorage),
+            usersRoutes(templateStorage, triangleStorage, userStorage, jwtTools),
         )
 
     val server: Http4kServer = app.asServer(Jetty(9000)).start()

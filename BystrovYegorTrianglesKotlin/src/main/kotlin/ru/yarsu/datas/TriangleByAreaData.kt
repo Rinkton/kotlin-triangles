@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 import java.util.*
 
-class TriangleByAreaData constructor(
+data class TriangleByAreaData constructor(
     @JsonProperty("Id")
     val id: UUID = UUID.randomUUID(),
     @JsonProperty("SideA")

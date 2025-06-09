@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 import java.util.*
 
-data class GetTrianglesData constructor(
+data class GetUsersData constructor(
     @JsonProperty("Id")
     val id: UUID = UUID.randomUUID(),
-    @JsonProperty("Description")
-    val description: String,
+    @JsonProperty("Login")
+    val login: String,
     @JsonProperty("RegistrationDateTime")
     val registrationDateTime: LocalDateTime,
+    @JsonProperty("Email")
+    val email: String,
 )

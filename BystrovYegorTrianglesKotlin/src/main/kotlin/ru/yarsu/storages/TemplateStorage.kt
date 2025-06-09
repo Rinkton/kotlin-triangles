@@ -26,4 +26,35 @@ class TemplateStorage(
     }
 
     fun getTemplates() = items
+
+    fun addTemplate(template: Template) {
+        items.add(template)
+    }
+
+    fun putTemplate(puttedTemplate: Template) {
+        for (template in items) {
+            if (template.id == puttedTemplate.id) {
+                items.remove(template)
+                items.add(template)
+                break
+            }
+        }
+    }
+
+    fun getIdOfExistingTemplateWithSameSides(sideA: Int, sideB: Int, sideC: Int): UUID? {
+        val sides = listOf(sideA, sideB, sideC).sorted()
+        val a = sides[0]
+        val b = sides[1]
+        val c = sides[2] // c - самая большая сторона
+        for (template in items) {
+            val templateSides = listOf(template.sideA, template.sideB, template.sideC).sorted()
+            val templateA = templateSides[0]
+            val templateB = templateSides[1]
+            val templateC = templateSides[2] // templateC - самая большая сторона
+            if (templateA == a && templateB == b && templateC == c) {
+                return template.id
+            }
+        }
+        return null
+    }
 }
