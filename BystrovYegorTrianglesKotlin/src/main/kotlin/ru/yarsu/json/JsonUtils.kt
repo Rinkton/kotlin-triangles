@@ -135,6 +135,18 @@ class JsonUtils {
             return Response(Status.NOT_FOUND).body(lowLevelJson.stringWriter.toString())
         }
 
+        fun getUserNotFoundResponse(userIdString: String?): Response {
+            val lowLevelJson = LowLevelJson()
+            with(lowLevelJson.outputGenerator) {
+                writeStartObject()
+                writeStringField("UserId", userIdString)
+                writeStringField("Error", "Пользователь не найден")
+                writeEndObject()
+                close()
+            }
+            return Response(Status.NOT_FOUND).body(lowLevelJson.stringWriter.toString())
+        }
+
         fun getBasicErrorJsonResponse(errorText: String): Response {
             val lowLevelJson = LowLevelJson()
             with(lowLevelJson.outputGenerator) {

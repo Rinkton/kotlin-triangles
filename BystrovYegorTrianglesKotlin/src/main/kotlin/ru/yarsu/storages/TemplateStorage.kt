@@ -35,7 +35,7 @@ class TemplateStorage(
         for (template in items) {
             if (template.id == puttedTemplate.id) {
                 items.remove(template)
-                items.add(template)
+                items.add(puttedTemplate)
                 break
             }
         }

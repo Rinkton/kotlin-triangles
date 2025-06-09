@@ -33,14 +33,14 @@ fun trianglesRoutes(
                 getTrianglesSortedByBorderColor(templateStorage, triangleStorage, userStorage, jwtTools),
                 getTrianglesSortedByBorderArea(templateStorage, triangleStorage, userStorage, jwtTools),
                 getTrianglesStatistics(templateStorage, triangleStorage, userStorage, jwtTools),
-                getTemplates(triangleStorage),
+                getTriangles(triangleStorage),
                 postTriangle(triangleStorage, userStorage, jwtTools),
                 getTriangleById(templateStorage, triangleStorage, userStorage, jwtTools),
                 deleteTriangle(templateStorage, triangleStorage, userStorage, jwtTools),
             ),
 )
 
-private fun getTemplates(triangleStorage: TriangleStorage) =
+private fun getTriangles(triangleStorage: TriangleStorage) =
     "".bind(Method.GET) to withErrorHandling {
         // get all datas and pass it to array list then check if it awaits for page and records-per-page
         val getTrianglesDatas = triangleStorage.getTriangles().map { triangle ->

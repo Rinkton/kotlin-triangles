@@ -210,9 +210,9 @@ private fun getTemplateById(templateStorage: TemplateStorage,
     }
 
 private fun putTemplate(templateStorage: TemplateStorage,
-                            triangleStorage: TriangleStorage,
-                            userStorage: UserStorage,
-                            jwtTools: JwtTools) =
+                        triangleStorage: TriangleStorage,
+                        userStorage: UserStorage,
+                        jwtTools: JwtTools) =
     "/{template-id}".bind(Method.PUT) to withErrorHandling {
         var userId = jwtTools.getExtractedUserIdAndValidate(it, userStorage)
         if (userId != null) {
