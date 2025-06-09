@@ -2,9 +2,11 @@ package ru.yarsu
 
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.ParameterException
+import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 import org.http4k.core.*
 import org.http4k.routing.bind
 import org.http4k.routing.routes
+import org.http4k.server.Http4kServer
 import org.http4k.server.Jetty
 import org.http4k.server.asServer
 import ru.yarsu.routes.trianglesRoutes
@@ -68,5 +70,55 @@ fun main(args: Array<String>) {
             userRoutes(templateStorage, triangleStorage, userStorage),
         )
 
-    app.asServer(Jetty(9000)).start()
+    val server: Http4kServer = app.asServer(Jetty(9000)).start()
+        server.start()
+
+    Runtime.getRuntime().addShutdownHook(Thread {
+        doBeforeShutdown(templateStorage, triangleStorage, userStorage)
+        server.stop()
+    })
+}
+
+private fun doBeforeShutdown(templateStorage: TemplateStorage,
+                             triangleStorage: TriangleStorage,
+                             userStorage: UserStorage) {
+    val templateRows = arrayListOf(arrayListOf("Id,SideA,SideB,SideC"))
+    for (template in templateStorage.getTemplates()) {
+        var a = arrayListOf(
+            template.id.toString(),
+            template.sideA.toString(),
+            template.sideB.toString(),
+            template.sideC.toString())
+        templateRows.add(a)
+    }
+
+    val triangleRows = arrayListOf(arrayListOf("Id,Template,RegistrationDateTime,BorderColor,FillColor,Description,Owner"))
+    for (triangle in triangleStorage.getTriangles()) {
+        var a = arrayListOf(
+            triangle.id.toString(),
+            triangle.template.toString(),
+            triangle.registrationDateTime.toString(),
+            triangle.borderColor.toString(),
+            triangle.fillColor.toString(),
+            triangle.description.toString(),
+            triangle.owner.toString(),
+        )
+        triangleRows.add(a)
+    }
+
+    val userRows = arrayListOf(arrayListOf("Id,Login,RegistrationDateTime,Email,Role"))
+    for (user in userStorage.getUsers()) {
+        var a = arrayListOf(
+            user.id.toString(),
+            user.login.toString(),
+            user.registrationDateTime.toString(),
+            user.email.toString(),
+            user.role.toString()
+        )
+        userRows.add(a)
+    }
+
+    csvWriter().writeAll(templateRows.toList(), "../sample-data/templates.csv")
+    csvWriter().writeAll(triangleRows.toList(), "../sample-data/triangles.csv")
+    csvWriter().writeAll(userRows.toList(), "../sample-data/users.csv")
 }

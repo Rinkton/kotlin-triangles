@@ -24,4 +24,6 @@ class TemplateStorage(
     fun getTemplateById(template: UUID): Template? {
         return items.find { it.id == template }
     }
+
+    fun getTemplates() = items
 }
